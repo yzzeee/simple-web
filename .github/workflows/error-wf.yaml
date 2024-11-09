@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: Setting an error message
         run: echo "::error::Missing semicolon"
-      - name: Setting a debug message with params 
+      - name: Setting a debug message with params
         run: echo "::debug::Missing Semicolon"
       - name: Setting an warning message with params
         run: echo "::warnin::Missing Semicolon"
@@ -17,7 +17,8 @@ jobs:
         run: |
           echo "::group::My group title"
           echo "Inside group"
-          echo "Inside group 2"
-          echo "Inside group 3"
           echo "::endgroup::"
-          echo "outside log"
+      - name: Masking a value
+        run: echo "::add-mask::Secret String"
+      - name: Echo a secret
+        run: echo "Secret String"
