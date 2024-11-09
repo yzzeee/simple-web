@@ -1,0 +1,9 @@
+name: practice-workflow
+on: [push, pull_request]
+
+jobs:
+  check-version-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check pip version
+        run: pip --version
