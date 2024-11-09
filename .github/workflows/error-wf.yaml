@@ -10,6 +10,6 @@ jobs:
       - name: Setting a debug message with params  
         run: echo "::debug::Missing Semicolon"
       - name: Setting an warning message with params
-        run: echo "::warnin::Missing Semicolon"
+        run: echo "::warning::Missing Semicolon"
       - name: Setting an notice message with params
         run: echo "::notice::Missing Semicolon"
