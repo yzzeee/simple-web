@@ -1,4 +1,4 @@
-name: Workflow Commands (debug2)
+name: Workflow Commands
 on: [push]
 
 jobs:
@@ -7,9 +7,16 @@ jobs:
     steps:
       - name: Setting an error message
         run: echo "::error::Missing semicolon"
-      - name: Setting a debug message with params  
+      - name: Setting a debug message with params 
         run: echo "::debug::Missing Semicolon"
       - name: Setting an warning message with params
-        run: echo "::warning::Missing Semicolon"
+        run: echo "::warnin::Missing Semicolon"
       - name: Setting an notice message with params
         run: echo "::notice::Missing Semicolon"
+      - name: Group of logs
+        run: |
+          echo "::group::My group title"
+          echo "Inside group"
+          echo "Inside group 2"
+          echo "Inside group 3"
+          echo "::endgroup::"
