@@ -1,26 +1,9 @@
-name: first-workflow
-on: [push]
+name: practice-workflow
+on: [push, pull_request]
 
 jobs:
-  shell-cmd-job:
+  check-version-job:
     runs-on: ubuntu-latest
     steps:
-      - name: echo Hello
-        run: echo "Hello World"
-      - name: multiple line cmd
-        run: |
-          node -v
-          npm -v
-  parallel-job:
-    runs-on: macos-latest
-    steps:
-      - name: show software version
-        run: sw_vers
-  dependant-job:
-    runs-on: windows-latest
-    needs: shell-cmd-job
-    steps:
-      - name: echo a string
-        run: Write-Output "Windows String"
-      - name: Error Step
-        run: doesnotexit
+      - name: check pip version
+        run: pip --version
