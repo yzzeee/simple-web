@@ -1,10 +1,10 @@
 name: first-workflow
 on: [push]
-jobs: 
+jobs:
   shell-cmd-job:
-    run-on: ubuntu:latest
+    runs-on: ubuntu-latest
     steps:
-      - name: echo Hello
+      - name: echo Hllo
         run: echo "Hello World"
       - name: multiple line cmd
         run: |
