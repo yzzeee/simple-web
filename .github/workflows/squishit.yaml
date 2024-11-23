@@ -3,15 +3,13 @@ name: Docker Build and Push with Yaml Update
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 env:
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
   IMAGE_NAME: ${{ secrets.DOCKER_HUB_USERNAME }}/simple-web
-  YAML_REPO: ${{ secrets.YAML_REPO }}  # 예: username/yaml-repo
-  PAT: ${{ secrets.PAT }}  # Personal Access Token
+  YAML_REPO: ${{ secrets.YAML_REPO }}
+  PAT: ${{ secrets.PAT }}
 
 jobs:
   build-and-push:
@@ -31,7 +29,6 @@ jobs:
           username: ${{ env.DOCKER_HUB_USERNAME }}
           password: ${{ env.DOCKER_HUB_TOKEN }}
 
-      # 커밋 SHA를 짧게 추출
       - name: Get short SHA
         id: slug
         run: echo "sha8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
@@ -48,7 +45,6 @@ jobs:
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:latest
           cache-to: type=inline
 
-      # yaml 레포지토리 업데이트
       - name: Checkout yaml repo
         if: github.event_name != 'pull_request'
         uses: actions/checkout@v4
@@ -61,14 +57,10 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           cd yaml-repo
-          # sed를 사용하여 이미지 태그 업데이트 (이미지 이름 유지하고 태그만 추가)
-          sed -i "s|image: yzzeee/simple-web$|image: yzzeee/simple-web:${{ steps.slug.outputs.sha8 }}|" simple-deploy.yaml
-          # 이미 태그가 있는 경우를 위한 처리
-          sed -i "s|image: yzzeee/simple-web:.*|image: yzzeee/simple-web:${{ steps.slug.outputs.sha8 }}|" simple-deploy.yaml
+          sed -i "s|\(image: ${{ env.DOCKER_HUB_USERNAME }}/simple-web\).*|\1:${{ steps.slug.outputs.sha8 }}|" simple-deploy.yaml
           
           git diff
 
-          # 변경사항 커밋 및 푸시
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add simple-deploy.yaml
