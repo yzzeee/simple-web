@@ -61,9 +61,12 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           cd yaml-repo
-          # values.yaml 또는 simple-deploy.yaml의 이미지 태그 업데이트
-          # sed를 사용하여 이미지 태그 변경
-          sed -i "s|image: ${{ env.IMAGE_NAME }}:.*|image: ${{ env.IMAGE_NAME }}:${{ steps.slug.outputs.sha8 }}|g" simple-deploy.yaml
+          # sed를 사용하여 이미지 태그 업데이트 (이미지 이름 유지하고 태그만 추가)
+          sed -i "s|image: yzzeee/simple-web$|image: yzzeee/simple-web:${{ steps.slug.outputs.sha8 }}|" deployment.yaml
+          # 이미 태그가 있는 경우를 위한 처리
+          sed -i "s|image: yzzeee/simple-web:.*|image: yzzeee/simple-web:${{ steps.slug.outputs.sha8 }}|" deployment.yaml
+          
+          git diff
           
           # 변경사항 커밋 및 푸시
           git config --global user.name 'github-actions[bot]'
