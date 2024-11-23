@@ -1,0 +1,73 @@
+name: Docker Build and Push with Yaml Update
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+  IMAGE_NAME: ${{ secrets.DOCKER_HUB_USERNAME }}/simple-web
+  YAML_REPO: ${{ secrets.YAML_REPO }}  # 예: username/yaml-repo
+  PAT: ${{ secrets.PAT }}  # Personal Access Token
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ env.DOCKER_HUB_TOKEN }}
+
+      # 커밋 SHA를 짧게 추출
+      - name: Get short SHA
+        id: slug
+        run: echo "sha8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ steps.slug.outputs.sha8 }}
+          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:latest
+          cache-to: type=inline
+
+      # yaml 레포지토리 업데이트
+      - name: Checkout yaml repo
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.YAML_REPO }}
+          token: ${{ env.PAT }}
+          path: yaml-repo
+
+      - name: Update image tag in yaml repo
+        if: github.event_name != 'pull_request'
+        run: |
+          cd yaml-repo
+          # values.yaml 또는 deployment.yaml의 이미지 태그 업데이트
+          # sed를 사용하여 이미지 태그 변경
+          sed -i "s|image: ${{ env.IMAGE_NAME }}:.*|image: ${{ env.IMAGE_NAME }}:${{ steps.slug.outputs.sha8 }}|g" deployment.yaml
+          
+          # 변경사항 커밋 및 푸시
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add deployment.yaml
+          git commit -m "Update image tag to ${{ steps.slug.outputs.sha8 }}"
+          git push
