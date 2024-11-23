@@ -63,7 +63,7 @@ jobs:
           cd yaml-repo
           # values.yaml 또는 deployment.yaml의 이미지 태그 업데이트
           # sed를 사용하여 이미지 태그 변경
-          sed -i "s|image: ${{ env.IMAGE_NAME }}:.*|image: ${{ env.IMAGE_NAME }}:${{ steps.slug.outputs.sha8 }}|g" deployment.yaml
+          sed -i "s|image: ${{ env.IMAGE_NAME }}:.*|image: ${{ env.IMAGE_NAME }}:${{ steps.slug.outputs.sha8 }}|g" simple-deploy.yaml
           
           # 변경사항 커밋 및 푸시
           git config --global user.name 'GitHub Actions'
